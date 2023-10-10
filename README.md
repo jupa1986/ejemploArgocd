@@ -37,10 +37,15 @@ Acceder mediante el link  http://localhost:8080
 Ahi crear un proyecto con los siguientes parametros
 
 PROJECT: default
+
 CLUSTER: in-cluster (https://kubernetes.default.svc)
-NAMESPACE: default   
+
+NAMESPACE: default
+
 REPO URL: https://github.com/jupa1986/ejemploArgocd
+
 TARGET REVISION: HEAD
+
 PATH: .
 
-Crear
+presionar create
