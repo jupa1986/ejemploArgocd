@@ -1,0 +1,85 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: helm-kafka-bitnami
+  namespace: argocd
+  # finalizers:
+  # - resources-finalizer.argocd.argoproj.io
+spec:
+  project: helm-charts
+  source:
+    chart: kafka
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 26.4.3
+    helm:
+      releaseName: bg-kafka
+      
+      parameters:
+      - name: "externalAccess.autoDiscovery.enabled"
+        value: "false"
+      - name: "controller.controllerOnly"
+        value: "true"
+      - name: "controller.replicaCount"
+        value: "0"
+      - name: "broker.replicaCount"
+        value: "3"
+      - name: "podSecurityContext.enabled"
+        value: "true"
+      - name: "podSecurityContext.fsGroup"
+        value: "1001"
+      - name: "containerSecurityContext.enabled"
+        value: "true"
+      - name: "containerSecurityContext.runAsUser"
+        value: "1001"  
+      - name: "numPartitions"
+        value: "8"
+      - name: "defaultReplicationFactor"
+        value: "3"
+      - name: "zookeeper.replicaCount"
+        value: "1"
+      - name: "global.storageClass"
+        value: "nfs-client"
+      - name: "volumePermissions.enabled"
+        value: "true"
+      - name: "livenessProbe.enabled"
+        value: "false"
+      - name: "readinessProbe.enabled"
+        value: "false"
+      - name: "kraft.enabled"
+        value: "false"
+      - name: "zookeeper.enabled"
+        value: "true"
+      - name: "heapOpts"
+        value: "-Xmx256m -Xms256m"
+      - name: "externalAccess.broker.enabled"
+        value: "true"
+      - name: "externalAccess.broker.service.type"
+        value: "ClusterIP"
+      - name: "externalAccess.broker.service.ports.external"
+        value: "9094"
+      - name: "externalAccess.broker.service.domain"
+        value: "172.16.1.125"
+      - name: "extraDeploy[0]"
+        value: |
+          apiVersion: configuration.konghq.com/v1beta1
+          kind: TCPIngress
+          metadata:
+            name: bg-kafka
+            namespace: bg-kafka
+            annotations:
+              kubernetes.io/ingress.class: kong
+          spec:
+            rules:
+              - backend:
+                  serviceName: bg-kafka-0-external
+                  servicePort: 9094
+                port: 9094
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bg-kafka
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    # automated:
+    #   prune: true
+    #   selfHeal: true
