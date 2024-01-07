@@ -51,7 +51,7 @@ spec:
         value: "true"
       - name: "heapOpts"
         value: "-Xmx256m -Xms256m"
-      - name: "externalAccess.broker.enabled"
+      - name: "externalAccess.enabled"
         value: "true"
       - name: "externalAccess.broker.service.type"
         value: "ClusterIP"
